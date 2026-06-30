@@ -66,8 +66,7 @@ fun DonationScreen() {
                 Text(
                     text = "Use Firebase Cloud Storage & In-House Serverless ML to automatically identify and catalogue donated food items.",
                     fontSize = 12.sp,
-                    color = Color.Gray,
-                    lineHeight = 1.4.sp
+                    color = Color.Gray
                 )
 
                 // Simulated Lens Viewfinder Card

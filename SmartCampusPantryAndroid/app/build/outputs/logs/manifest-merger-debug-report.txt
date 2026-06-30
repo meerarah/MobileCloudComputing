@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:2:1-27:12
-INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:2:1-27:12
-INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:2:1-27:12
-INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:2:1-27:12
+ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:2:1-27:12
+INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:2:1-27:12
+INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:2:1-27:12
+INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:2:1-27:12
 MERGED from [com.google.firebase:firebase-storage-ktx:20.3.0] C:\Users\User\.gradle\caches\8.13\transforms\c1d506606ac12dfeeb8f5a493449df6f\transformed\jetified-firebase-storage-ktx-20.3.0\AndroidManifest.xml:2:1-18:12
 MERGED from [com.google.firebase:firebase-firestore-ktx:24.10.2] C:\Users\User\.gradle\caches\8.13\transforms\856a9dbdb6eb2c843db7dae398eb5f78\transformed\jetified-firebase-firestore-ktx-24.10.2\AndroidManifest.xml:2:1-18:12
 MERGED from [androidx.compose.material3:material3:1.1.1] C:\Users\User\.gradle\caches\8.13\transforms\575f69bb73ff18f67b05c24a1a561568\transformed\jetified-material3-1.1.1\AndroidManifest.xml:17:1-22:12
@@ -87,16 +87,16 @@ MERGED from [androidx.exifinterface:exifinterface:1.3.7] C:\Users\User\.gradle\c
 MERGED from [io.grpc:grpc-android:1.57.2] C:\Users\User\.gradle\caches\8.13\transforms\4b3527b8b9ad7701bb49b71430f1d89c\transformed\jetified-grpc-android-1.57.2\AndroidManifest.xml:2:1-9:12
 MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\User\.gradle\caches\8.13\transforms\10904f2b4f5882313fb60ccb7ca2f86c\transformed\jetified-protolite-well-known-types-18.0.0\AndroidManifest.xml:2:1-11:12
 	package
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:3:5-47
-		INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:3:5-47
+		INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
 	android:versionName
-		INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
 	android:versionCode
-		INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
 	xmlns:android
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:2:11-69
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:2:11-69
 uses-permission#android.permission.INTERNET
-ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:6:5-67
+ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:6:5-67
 MERGED from [com.google.firebase:firebase-auth:22.3.1] C:\Users\User\.gradle\caches\8.13\transforms\ebcc44bbf32b08b84d42218c0f1a281d\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:25:5-67
 MERGED from [com.google.firebase:firebase-auth:22.3.1] C:\Users\User\.gradle\caches\8.13\transforms\ebcc44bbf32b08b84d42218c0f1a281d\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:25:5-67
 MERGED from [com.google.firebase:firebase-storage:20.3.0] C:\Users\User\.gradle\caches\8.13\transforms\9e737ef38294d10cc74e354655cd58a8\transformed\jetified-firebase-storage-20.3.0\AndroidManifest.xml:24:5-67
@@ -106,9 +106,9 @@ MERGED from [com.google.firebase:firebase-firestore:24.10.2] C:\Users\User\.grad
 MERGED from [com.google.android.recaptcha:recaptcha:18.4.0] C:\Users\User\.gradle\caches\8.13\transforms\c0420fc0339de1814e658d5484666918\transformed\jetified-recaptcha-18.4.0\AndroidManifest.xml:7:5-67
 MERGED from [com.google.android.recaptcha:recaptcha:18.4.0] C:\Users\User\.gradle\caches\8.13\transforms\c0420fc0339de1814e658d5484666918\transformed\jetified-recaptcha-18.4.0\AndroidManifest.xml:7:5-67
 	android:name
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:6:22-64
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:6:22-64
 uses-permission#android.permission.ACCESS_NETWORK_STATE
-ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:7:5-79
+ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:7:5-79
 MERGED from [com.google.firebase:firebase-auth:22.3.1] C:\Users\User\.gradle\caches\8.13\transforms\ebcc44bbf32b08b84d42218c0f1a281d\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:26:5-79
 MERGED from [com.google.firebase:firebase-auth:22.3.1] C:\Users\User\.gradle\caches\8.13\transforms\ebcc44bbf32b08b84d42218c0f1a281d\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:26:5-79
 MERGED from [com.google.firebase:firebase-storage:20.3.0] C:\Users\User\.gradle\caches\8.13\transforms\9e737ef38294d10cc74e354655cd58a8\transformed\jetified-firebase-storage-20.3.0\AndroidManifest.xml:23:5-79
@@ -120,10 +120,10 @@ MERGED from [com.google.android.recaptcha:recaptcha:18.4.0] C:\Users\User\.gradl
 MERGED from [io.grpc:grpc-android:1.57.2] C:\Users\User\.gradle\caches\8.13\transforms\4b3527b8b9ad7701bb49b71430f1d89c\transformed\jetified-grpc-android-1.57.2\AndroidManifest.xml:7:5-79
 MERGED from [io.grpc:grpc-android:1.57.2] C:\Users\User\.gradle\caches\8.13\transforms\4b3527b8b9ad7701bb49b71430f1d89c\transformed\jetified-grpc-android-1.57.2\AndroidManifest.xml:7:5-79
 	android:name
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:7:22-76
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:7:22-76
 application
-ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:9:5-25:19
-INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:9:5-25:19
+ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:9:5-25:19
+INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:9:5-25:19
 MERGED from [com.google.firebase:firebase-storage-ktx:20.3.0] C:\Users\User\.gradle\caches\8.13\transforms\c1d506606ac12dfeeb8f5a493449df6f\transformed\jetified-firebase-storage-ktx-20.3.0\AndroidManifest.xml:8:5-16:19
 MERGED from [com.google.firebase:firebase-storage-ktx:20.3.0] C:\Users\User\.gradle\caches\8.13\transforms\c1d506606ac12dfeeb8f5a493449df6f\transformed\jetified-firebase-storage-ktx-20.3.0\AndroidManifest.xml:8:5-16:19
 MERGED from [com.google.firebase:firebase-firestore-ktx:24.10.2] C:\Users\User\.gradle\caches\8.13\transforms\856a9dbdb6eb2c843db7dae398eb5f78\transformed\jetified-firebase-firestore-ktx-24.10.2\AndroidManifest.xml:8:5-16:19
@@ -171,41 +171,41 @@ MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\User\.gr
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\User\.gradle\caches\8.13\transforms\c6e5b753a1d357ae5f24d8198a0cc275\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\User\.gradle\caches\8.13\transforms\c6e5b753a1d357ae5f24d8198a0cc275\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
 	android:extractNativeLibs
-		INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.12.0] C:\Users\User\.gradle\caches\8.13\transforms\5c637c428116bbc83288c1d7d156554f\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:12:9-35
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:12:9-35
 	android:label
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:11:9-44
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:11:9-44
 	android:allowBackup
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:10:9-35
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:10:9-35
 	android:usesCleartextTraffic
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:13:9-44
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:13:9-44
 activity#com.university.smartcampuspantry.MainActivity
-ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:15:9-24:20
+ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:15:9-24:20
 	android:label
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:18:13-48
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:18:13-48
 	android:exported
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:17:13-36
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:17:13-36
 	android:theme
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:19:13-70
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:19:13-70
 	android:name
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:16:13-41
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:16:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:20:13-23:29
+ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:20:13-23:29
 action#android.intent.action.MAIN
-ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:21:17-69
+ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:21:17-69
 	android:name
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:21:25-66
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:21:25-66
 category#android.intent.category.LAUNCHER
-ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:22:17-77
+ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:22:17-77
 	android:name
-		ADDED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:22:27-74
+		ADDED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:22:27-74
 uses-sdk
-INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
-INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
 MERGED from [com.google.firebase:firebase-storage-ktx:20.3.0] C:\Users\User\.gradle\caches\8.13\transforms\c1d506606ac12dfeeb8f5a493449df6f\transformed\jetified-firebase-storage-ktx-20.3.0\AndroidManifest.xml:5:5-44
 MERGED from [com.google.firebase:firebase-storage-ktx:20.3.0] C:\Users\User\.gradle\caches\8.13\transforms\c1d506606ac12dfeeb8f5a493449df6f\transformed\jetified-firebase-storage-ktx-20.3.0\AndroidManifest.xml:5:5-44
 MERGED from [com.google.firebase:firebase-firestore-ktx:24.10.2] C:\Users\User\.gradle\caches\8.13\transforms\856a9dbdb6eb2c843db7dae398eb5f78\transformed\jetified-firebase-firestore-ktx-24.10.2\AndroidManifest.xml:5:5-44
@@ -373,9 +373,9 @@ MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\Use
 	tools:overrideLibrary
 		ADDED from [com.google.firebase:firebase-auth:22.3.1] C:\Users\User\.gradle\caches\8.13\transforms\ebcc44bbf32b08b84d42218c0f1a281d\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:23:9-61
 	android:targetSdkVersion
-		INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml
 service#com.google.firebase.components.ComponentDiscoveryService
 ADDED from [com.google.firebase:firebase-storage-ktx:20.3.0] C:\Users\User\.gradle\caches\8.13\transforms\c1d506606ac12dfeeb8f5a493449df6f\transformed\jetified-firebase-storage-ktx-20.3.0\AndroidManifest.xml:9:9-15:19
 MERGED from [com.google.firebase:firebase-firestore-ktx:24.10.2] C:\Users\User\.gradle\caches\8.13\transforms\856a9dbdb6eb2c843db7dae398eb5f78\transformed\jetified-firebase-firestore-ktx-24.10.2\AndroidManifest.xml:9:9-15:19

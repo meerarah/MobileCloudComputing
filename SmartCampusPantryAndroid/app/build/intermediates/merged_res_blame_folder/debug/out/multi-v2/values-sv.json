@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.university.smartcampuspantry.app-mergeDebugResources-3:/values-sv/values-sv.xml",
+            "outputFile": "com.university.smartcampuspantry.app-mergeDebugResources-51:/values-sv/values-sv.xml",
             "map": [
                 {
                     "source": "C:\\Users\\User\\.gradle\\caches\\8.13\\transforms\\1af52976b0d3f4718d4b294af7f03143\\transformed\\jetified-play-services-base-18.1.0\\res\\values-sv\\values.xml",

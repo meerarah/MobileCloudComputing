@@ -10,11 +10,11 @@
 10
 11    <!-- Permissions required for cloud APIs and REST endpoint calls -->
 12    <uses-permission android:name="android.permission.INTERNET" />
-12-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:6:5-67
-12-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:6:22-64
+12-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:6:5-67
+12-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:6:22-64
 13    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-13-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:7:5-79
-13-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:7:22-76
+13-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:7:5-79
+13-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:7:22-76
 14    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 14-->[com.google.android.recaptcha:recaptcha:18.4.0] C:\Users\User\.gradle\caches\8.13\transforms\c0420fc0339de1814e658d5484666918\transformed\jetified-recaptcha-18.4.0\AndroidManifest.xml:9:5-98
 14-->[com.google.android.recaptcha:recaptcha:18.4.0] C:\Users\User\.gradle\caches\8.13\transforms\c0420fc0339de1814e658d5484666918\transformed\jetified-recaptcha-18.4.0\AndroidManifest.xml:9:22-95
@@ -31,38 +31,38 @@
 20-->[androidx.core:core:1.12.0] C:\Users\User\.gradle\caches\8.13\transforms\5c637c428116bbc83288c1d7d156554f\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
 21
 22    <application
-22-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:9:5-25:19
+22-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:9:5-25:19
 23        android:allowBackup="true"
-23-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:10:9-35
+23-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:10:9-35
 24        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 24-->[androidx.core:core:1.12.0] C:\Users\User\.gradle\caches\8.13\transforms\5c637c428116bbc83288c1d7d156554f\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
 25        android:debuggable="true"
 26        android:extractNativeLibs="false"
 27        android:label="Smart Campus Pantry"
-27-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:11:9-44
+27-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:11:9-44
 28        android:supportsRtl="true"
-28-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:12:9-35
+28-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:12:9-35
 29        android:usesCleartextTraffic="true" >
-29-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:13:9-44
+29-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:13:9-44
 30        <activity
-30-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:15:9-24:20
+30-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:15:9-24:20
 31            android:name="com.university.smartcampuspantry.MainActivity"
-31-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:16:13-41
+31-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:16:13-41
 32            android:exported="true"
-32-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:17:13-36
+32-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:17:13-36
 33            android:label="Smart Campus Pantry"
-33-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:18:13-48
+33-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:18:13-48
 34            android:theme="@android:style/Theme.Material.NoActionBar" >
-34-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:19:13-70
+34-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:19:13-70
 35            <intent-filter>
-35-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:20:13-23:29
+35-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:20:13-23:29
 36                <action android:name="android.intent.action.MAIN" />
-36-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:21:17-69
-36-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:21:25-66
+36-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:21:17-69
+36-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:21:25-66
 37
 38                <category android:name="android.intent.category.LAUNCHER" />
-38-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:22:17-77
-38-->C:\SmartCampusPantry\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:22:27-74
+38-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:22:17-77
+38-->C:\Users\User\OneDrive\Documents\GitHub\MobileCloudComputing\SmartCampusPantryAndroid\app\src\main\AndroidManifest.xml:22:27-74
 39            </intent-filter>
 40        </activity>
 41
