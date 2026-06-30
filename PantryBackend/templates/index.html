@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantry Management Portal - Admin Console</title>
+    <!-- Premium Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Styled CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-body">
+    <!-- Background Glow Visuals -->
+    <div class="bg-glow bg-glow-blue"></div>
+
+    <div class="admin-container">
+        <!-- Master Navbar Header -->
+        <header class="admin-navbar">
+            <div class="navbar-brand">
+                <i class="fa-solid fa-store-slash brand-icon"></i>
+                <h1>Pantry Management Portal</h1>
+                <span class="badge-role">Admin Operations</span>
+            </div>
+            <div class="navbar-status">
+                <div class="status-indicator-tag">
+                    <span class="status-dot green animate-pulse"></span>
+                    <span>Server: <strong>Operational</strong></span>
+                </div>
+                <div class="status-indicator-tag">
+                    <span class="status-dot green"></span>
+                    <span>Database: <strong>Synced</strong></span>
+                </div>
+                <button class="btn-signout" id="btn-admin-signout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Sign Out</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- GRID 1: Locations Status -->
+        <section class="section-card locations-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fa-solid fa-map-location-dot icon-blue"></i>
+                    <h2>Pantry Locations Status</h2>
+                </div>
+                <span class="desc-helper">Monitor which pantry stations need stock checks</span>
+            </div>
+            <div class="locations-grid" id="locations-container">
+                <!-- Populated dynamically via app.js -->
+            </div>
+        </section>
+
+        <!-- Main Workspace Grid -->
+        <div class="dashboard-grid">
+            <!-- Left Side: Claims / Sign-out History -->
+            <section class="panel-card claims-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fa-solid fa-cart-flatbed-suitcases panel-icon text-blue"></i>
+                        <h3>Sign-out History (Items Taken)</h3>
+                    </div>
+                </div>
+                <p class="panel-desc">Records of students checking out food items from the pantry hubs.</p>
+                
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Student ID</th>
+                                <th>Phone Number</th>
+                                <th>Item Checked Out</th>
+                                <th>Pantry Location</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="claims-table-rows">
+                            <!-- Populated dynamically via app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Right Side: Restock & Donations History -->
+            <section class="panel-card restocks-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fa-solid fa-circle-arrow-up panel-icon text-green"></i>
+                        <h3>Restock & Contribution History</h3>
+                    </div>
+                </div>
+                <p class="panel-desc">Donated items and inventory refills uploaded to the hubs.</p>
+                
+                <div class="restocks-grid" id="restocks-container">
+                    <!-- Populated dynamically via app.js -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Student Issue Reports -->
+        <section class="section-card reports-section" style="margin-top: 24px;">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fa-solid fa-triangle-exclamation icon-red" style="color: var(--accent-red);"></i>
+                    <h2>Student Issue Reports (Flagged Items)</h2>
+                </div>
+                <span class="desc-helper">Feedback submitted by customers regarding item status (e.g. expired, damaged)</span>
+            </div>
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Student ID</th>
+                            <th>Flagged Item</th>
+                            <th>Pantry Location</th>
+                            <th>Reported Issue</th>
+                            <th>Time Reported</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reports-table-rows">
+                        <!-- Populated dynamically via app.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Admin Login Screen overlay -->
+    <div class="modal-overlay" id="admin-login-screen">
+        <form class="admin-login-card" id="admin-login-form">
+            <div class="login-header-icon">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2>Staff Login</h2>
+            <p>Sign in with your UiTM staff credentials to access the portal.</p>
+            
+            <div class="form-group">
+                <label for="admin-email">Email Address</label>
+                <input type="email" id="admin-email" value="deneh@staf.uitm.edu.my" placeholder="name@staf.uitm.edu.my" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="admin-password">Password</label>
+                <input type="password" id="admin-password" value="12345678" placeholder="••••••••" required>
+            </div>
+            
+            <div id="login-error-msg" class="login-error-text hide"></div>
+            
+            <button id="btn-admin-login" type="submit">
+                <span>Access Console</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <!-- Script Logic -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

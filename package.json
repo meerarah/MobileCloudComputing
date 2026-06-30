@@ -1,0 +1,20 @@
+{
+  "name": "smart-campus-pantry",
+  "version": "1.0.0",
+  "description": "Smart Campus Pantry - ITT632 Mobile Cloud Computing Project",
+  "main": "PantryBackend/app.py",
+  "scripts": {
+    "dev": "python PantryBackend/app.py",
+    "init-db": "python PantryBackend/init_db.py",
+    "test": "python PantryBackend/test_backend.py"
+  },
+  "keywords": [
+    "swiftui",
+    "flask",
+    "firebase",
+    "mcc",
+    "itt632"
+  ],
+  "author": "ITT632 Student",
+  "license": "MIT"
+}
