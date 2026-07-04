@@ -26,9 +26,7 @@ try {
 
 // Local mock locations state
 let locations = [
-    { id: "loc_1", name: "Kolej Perindu Hub", status: "Needs Restocking", lastChecked: "10 mins ago" },
-    { id: "loc_2", name: "Kolej Mawar Hub", status: "Stocked", lastChecked: "1 hour ago" },
-    { id: "loc_3", name: "Kolej Mawar Hub 2", status: "Needs Restocking", lastChecked: "30 mins ago" }
+    { id: "loc_1", name: "Kolej Mawar Hub", status: "Needs Restocking", lastChecked: "10 mins ago" }
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -40,11 +38,13 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchClaims();
     fetchRestocks();
     fetchReports();
+    fetchStudents();
 
     // 3. Setup periodic polling (every 2 seconds) for real-time synchronization
     setInterval(fetchClaims, 2000);
     setInterval(fetchRestocks, 2000);
     setInterval(fetchReports, 2000);
+    setInterval(fetchStudents, 5000);
 
     // 4. Bind login form submit event
     const loginForm = document.getElementById("admin-login-form");
@@ -183,6 +183,54 @@ function renderLocations() {
     });
 }
 
+/**
+ * Reset quota for a specific student
+ */
+async function resetStudentQuota(studentId) {
+    if (!confirm(`Are you sure you want to reset the weekly quota for student ${studentId}?`)) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/student/${studentId}/reset-quota`, {
+            method: 'PUT'
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(result.message);
+            fetchStudents(); // Refresh table
+        } else {
+            alert(result.message);
+        }
+    } catch (err) {
+        console.error("Error resetting student quota:", err);
+        alert("Failed to reset student quota.");
+    }
+}
+
+/**
+ * Reset quota for all students globally
+ */
+async function resetAllQuotas() {
+    if (!confirm("Are you sure you want to completely reset the weekly quota for ALL students? This is usually done on Monday mornings.")) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/reset-claims`, {
+            method: 'POST'
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(result.message);
+            fetchStudents(); // Refresh table
+        } else {
+            alert(result.message);
+        }
+    } catch (err) {
+        console.error("Error resetting all quotas:", err);
+        alert("Failed to reset quotas globally.");
+    }
+}
+
 window.restockLocation = function(id) {
     const loc = locations.find(l => l.id === id);
     if (loc) {
@@ -250,15 +298,22 @@ async function fetchRestocks() {
             }
             
             data.restocks.forEach(r => {
-                // Map images to high-quality unsplash sources for mock data
                 let imgSrc = r.imageUrl || "tuna";
-                if (!imgSrc.startsWith("http")) {
-                    if (imgSrc === "tuna") imgSrc = "https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?w=150&auto=format&fit=crop&q=60";
-                    else if (imgSrc === "cereal") imgSrc = "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=150&auto=format&fit=crop&q=60";
-                    else if (imgSrc === "apple") imgSrc = "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=150&auto=format&fit=crop&q=60";
-                    else if (imgSrc === "milk") imgSrc = "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=150&auto=format&fit=crop&q=60";
-                    else if (imgSrc === "soup") imgSrc = "https://images.unsplash.com/photo-1547592165-e1d17fed6006?w=150&auto=format&fit=crop&q=60";
-                    else imgSrc = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=150&auto=format&fit=crop&q=60";
+                
+                const getFallback = (name) => {
+                    const iName = (name || "").toLowerCase();
+                    if (iName.includes("tuna")) return "https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?w=150&auto=format&fit=crop&q=60";
+                    if (iName.includes("cereal")) return "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=150&auto=format&fit=crop&q=60";
+                    if (iName.includes("apple") || iName.includes("gala")) return "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=150&auto=format&fit=crop&q=60";
+                    if (iName.includes("milk")) return "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=150&auto=format&fit=crop&q=60";
+                    if (iName.includes("soup")) return "https://images.unsplash.com/photo-1547592165-e1d17fed6006?w=150&auto=format&fit=crop&q=60";
+                    return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=150&auto=format&fit=crop&q=60";
+                };
+
+                const fallbackUrl = getFallback(r.itemName);
+                
+                if (!imgSrc.startsWith("http") || imgSrc.startsWith("content://")) {
+                    imgSrc = fallbackUrl;
                 }
                 
                 const time = r.timestamp ? r.timestamp.split(" ")[1] || r.timestamp : "Just now";
@@ -267,7 +322,7 @@ async function fetchRestocks() {
                 card.className = "restock-card";
                 card.innerHTML = `
                     <div class="restock-img-box">
-                        <img src="${imgSrc}" class="restock-img" alt="${r.itemName}">
+                        <img src="${imgSrc}" class="restock-img" alt="${r.itemName}" onerror="this.onerror=null; this.src='${fallbackUrl}';">
                     </div>
                     <div class="restock-info">
                         <div class="restock-item-title">${r.itemName}</div>
@@ -324,3 +379,143 @@ async function fetchReports() {
         console.error("Error fetching reports:", err);
     }
 }
+
+/**
+ * Fetch and render students table
+ */
+async function fetchStudents() {
+    const tableBody = document.getElementById("students-table-rows");
+    if (!tableBody) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/api/students`);
+        const data = await response.json();
+        
+        if (data.success) {
+            tableBody.innerHTML = "";
+            if (data.students.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-slate);">No registered students found.</td></tr>`;
+                return;
+            }
+            
+            data.students.forEach(s => {
+                const tr = document.createElement("tr");
+                
+                tr.innerHTML = `
+                    <td><strong>${s.name}</strong></td>
+                    <td><span class="student-id-badge">${s.studentId}</span></td>
+                    <td><span class="phone-badge">${s.phone || "N/A"}</span></td>
+                    <td>${s.claimsThisWeek} / 3</td>
+                    <td><span style="color: var(--accent-green); font-weight: bold;">${s.impactPoints} pts</span></td>
+                    <td style="display: flex; gap: 8px;">
+                        <button onclick="resetStudentQuota('${s.studentId}')" style="background: var(--accent-orange); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            <i class="fa-solid fa-rotate-left"></i> Reset Quota
+                        </button>
+                        <button onclick="openEditStudentModal('${s.studentId}', '${s.name}', '${s.phone || ''}', ${s.impactPoints})" style="background: var(--accent-blue); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            <i class="fa-solid fa-pen"></i> Edit
+                        </button>
+                        <button onclick="deleteStudent('${s.studentId}')" style="background: var(--accent-red); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+    } catch (err) {
+        console.error("Error fetching students:", err);
+    }
+}
+
+async function deleteStudent(studentId) {
+    if (!confirm(`Are you sure you want to permanently delete student ${studentId}?`)) return;
+    
+    try {
+        const res = await fetch(`${API_BASE}/api/student/${studentId}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+            fetchStudents();
+        } else {
+            alert(data.message || "Failed to delete student");
+        }
+    } catch (err) {
+        console.error("Error deleting student:", err);
+        alert("An error occurred while deleting the student.");
+    }
+}
+
+// Student CRUD Modal Logic
+function openAddStudentModal() {
+    document.getElementById('student-modal-title').innerText = "Add Student";
+    document.getElementById('student-modal-mode').value = "add";
+    document.getElementById('modal-student-id').value = "";
+    document.getElementById('modal-student-id').readOnly = false;
+    document.getElementById('modal-student-name').value = "";
+    document.getElementById('modal-student-phone').value = "";
+    document.getElementById('points-group').style.display = "none";
+    
+    document.getElementById('student-modal').style.display = "flex";
+}
+
+function openEditStudentModal(id, name, phone, points) {
+    document.getElementById('student-modal-title').innerText = "Edit Student";
+    document.getElementById('student-modal-mode').value = "edit";
+    document.getElementById('modal-student-id').value = id;
+    document.getElementById('modal-student-id').readOnly = true;
+    document.getElementById('modal-student-name').value = name;
+    document.getElementById('modal-student-phone').value = phone;
+    
+    const pointsGroup = document.getElementById('points-group');
+    pointsGroup.style.display = "block";
+    document.getElementById('modal-student-points').value = points;
+    
+    document.getElementById('student-modal').style.display = "flex";
+}
+
+function closeStudentModal() {
+    document.getElementById('student-modal').style.display = "none";
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const studentForm = document.getElementById('student-form');
+    if (studentForm) {
+        studentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const mode = document.getElementById('student-modal-mode').value;
+            const studentId = document.getElementById('modal-student-id').value.trim();
+            const name = document.getElementById('modal-student-name').value.trim();
+            const phone = document.getElementById('modal-student-phone').value.trim();
+            const points = parseInt(document.getElementById('modal-student-points').value) || 0;
+            
+            try {
+                let url, method, body;
+                if (mode === "add") {
+                    url = `${API_BASE}/api/register`;
+                    method = 'POST';
+                    body = { studentId, name, phone, password: "password123" }; // default password
+                } else {
+                    url = `${API_BASE}/api/student/${studentId}`;
+                    method = 'PUT';
+                    body = { name, phone, impactPoints: points };
+                }
+                
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    closeStudentModal();
+                    fetchStudents();
+                } else {
+                    alert(data.message || "Failed to save student.");
+                }
+            } catch (err) {
+                console.error("Error saving student:", err);
+                alert("An error occurred.");
+            }
+        });
+    }
+});

@@ -345,7 +345,7 @@ fun InventoryScreen() {
                         apiService.submitReport(
                             studentId = studentId,
                             itemName = item.name,
-                            location = "Kolej Perindu Hub",
+                            location = "Kolej Mawar Hub",
                             issue = issueText.trim()
                         ) { result ->
                             isSubmittingReport = false
@@ -430,7 +430,7 @@ fun FoodCard(item: FoodItem, onClaimClick: () -> Unit, onReportClick: () -> Unit
             // Food Image Box with AsyncImage loader
             val nameLower = item.name.lowercase()
             var resolvedUrl = ""
-            if (item.imageUrl.isNotEmpty() && item.imageUrl.startsWith("http")) {
+            if (item.imageUrl.isNotEmpty() && (item.imageUrl.startsWith("http") || item.imageUrl.startsWith("content://"))) {
                 resolvedUrl = item.imageUrl
             } else {
                 val searchKey = if (item.imageUrl.isNotEmpty()) item.imageUrl.lowercase() else nameLower

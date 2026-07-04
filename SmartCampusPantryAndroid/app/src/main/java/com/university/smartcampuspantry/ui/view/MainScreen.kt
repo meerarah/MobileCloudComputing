@@ -19,8 +19,8 @@ fun MainScreen(onSignOutClick: () -> Unit) {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Smart Campus Pantry",
-                        fontWeight = FontWeight.Bold,
+                        text = "Kolej Mawar Pantry",
+                        fontWeight = FontWeight.ExtraBold,
                         fontSize = 18.sp,
                         color = Color.White
                     )

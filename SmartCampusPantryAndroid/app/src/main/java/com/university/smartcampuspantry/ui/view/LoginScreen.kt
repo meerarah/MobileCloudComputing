@@ -66,9 +66,9 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             }
 
             Text(
-                text = "Smart Campus Pantry",
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
+                text = "UiTM Kolej Mawar Pantry",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
                 color = Color(0xFF101A2C)
             )
 
@@ -127,9 +127,10 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         )
                         OutlinedTextField(
                             value = email,
-                            onValueChange = { email = it },
-                            placeholder = { Text("email@student.uitm.edu.my") },
+                            onValueChange = { email = it.replace("@student.uitm.edu.my", "").trim() },
+                            placeholder = { Text("username") },
                             singleLine = true,
+                            suffix = { Text("@student.uitm.edu.my", color = Color.Gray) },
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Email,
                                 imeAction = ImeAction.Next
@@ -237,18 +238,17 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                                     errorMessage = "Please fill in all registration fields."
                                     return@Button
                                 }
-                                if (!email.lowercase().endsWith("@student.uitm.edu.my")) {
-                                    errorMessage = "Only UiTM student emails (@student.uitm.edu.my) are allowed."
-                                    return@Button
-                                }
+                                val fullEmail = if (email.endsWith("@student.uitm.edu.my")) email else "$email@student.uitm.edu.my"
+                                
                                 isLoading = true
                                 // 1. Register student in SQLite backend
                                 APIService.shared.registerStudent(studentId, name, phone) { regResult ->
                                     if (regResult.isSuccess) {
                                         // 2. Sign in/create in Firebase Auth
-                                        firebaseService.signIn(email, studentId) { authResult ->
+                                        firebaseService.signIn(fullEmail, studentId) { authResult ->
                                             isLoading = false
                                             if (authResult.isSuccess) {
+                                                firebaseService.setSession(fullEmail, studentId)
                                                 Toast.makeText(context, "Registration Successful!", Toast.LENGTH_LONG).show()
                                                 onLoginSuccess()
                                             } else {
@@ -266,15 +266,19 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                                     errorMessage = "Please enter both Email and Student ID."
                                     return@Button
                                 }
+                                val fullEmail = if (email.endsWith("@student.uitm.edu.my")) email else "$email@student.uitm.edu.my"
+                                
                                 isLoading = true
-                                firebaseService.signIn(email, studentId) { result ->
+                                firebaseService.signIn(fullEmail, studentId) { result ->
                                     if (result.isSuccess) {
                                         val uid = result.getOrThrow()
                                         APIService.shared.fetchStudentProfile(uid) { profileResult ->
                                             isLoading = false
                                             if (profileResult.isSuccess) {
+                                                firebaseService.setSession(fullEmail, studentId)
                                                 onLoginSuccess()
                                             } else {
+                                                firebaseService.signOut()
                                                 errorMessage = profileResult.exceptionOrNull()?.message ?: "SQLite verification failed."
                                             }
                                         }

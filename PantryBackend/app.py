@@ -104,6 +104,53 @@ def get_student(student_id):
         "maxWeeklyClaims": 3
     })
 
+@app.route('/api/student/<student_id>', methods=['DELETE'])
+def delete_student(student_id):
+    """Deletes a student profile from SQLite."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM students WHERE student_id = ?', (student_id,))
+    conn.commit()
+    conn.close()
+    
+    record_log("DELETE", f"/api/student/{student_id}", f"Deleted student profile", 200)
+    return jsonify({
+        "success": True,
+        "message": f"Student with ID {student_id} successfully deleted."
+    })
+
+@app.route('/api/student/<student_id>', methods=['PUT'])
+def update_student(student_id):
+    """Updates a student's profile details."""
+    data = request.json or {}
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    student = cursor.execute('SELECT * FROM students WHERE student_id = ?', (student_id,)).fetchone()
+    if not student:
+        conn.close()
+        return jsonify({"success": False, "message": "Student not found"}), 404
+        
+    new_name = data.get('name', student['name'])
+    new_phone = data.get('phone', student['phone'])
+    new_points = data.get('impactPoints', student['impact_points'])
+    
+    # We can also update claims if desired, but we'll focus on name, phone, points
+    cursor.execute('''
+        UPDATE students
+        SET name = ?, phone = ?, impact_points = ?
+        WHERE student_id = ?
+    ''', (new_name, new_phone, new_points, student_id))
+    
+    conn.commit()
+    conn.close()
+    
+    record_log("PUT", f"/api/student/{student_id}", f"Updated student profile", 200)
+    return jsonify({
+        "success": True,
+        "message": "Student successfully updated."
+    })
+
 @app.route('/api/student/toggle', methods=['POST'])
 def toggle_student_eligibility():
     """Admin feature: Toggles a student's eligibility status inside SQLite database."""
@@ -180,7 +227,7 @@ def process_claim():
     student_id = data.get('studentId')
     item_id = data.get('itemId')
     item_name = data.get('itemName', 'Unknown Food Item')
-    location = data.get('location', 'Kolej Perindu Hub')
+    location = data.get('location', 'Kolej Mawar Hub')
     
     if not student_id or not item_id:
         record_log("POST", "/api/claim", "Claim rejected: Missing studentId or itemId", 400)
@@ -458,6 +505,18 @@ def get_all_reports():
         "success": True,
         "reports": reports_list
     })
+
+@app.route('/api/student/<student_id>/reset-quota', methods=['PUT'])
+def reset_student_quota(student_id):
+    """Resets the weekly claim counter for a specific student."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE students SET claims_this_week = 0 WHERE student_id = ?', (student_id,))
+    conn.commit()
+    conn.close()
+    
+    record_log("PUT", f"/api/student/{student_id}/reset-quota", f"Admin action: Reset weekly claim quota for {student_id}", 200)
+    return jsonify({"success": True, "message": f"Quota for student {student_id} reset successfully."})
 
 @app.route('/api/reset-claims', methods=['POST'])
 def reset_claims():

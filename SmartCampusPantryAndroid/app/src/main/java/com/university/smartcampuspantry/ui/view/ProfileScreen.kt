@@ -147,26 +147,7 @@ fun ProfileScreen(onSignOutClick: () -> Unit) {
                     }
                 }
 
-                // Allowance Reset button (for testing)
-                Button(
-                    onClick = {
-                        // Call reset endpoint on Flask API
-                        threadCallReset { success ->
-                            if (success) {
-                                refreshProfile()
-                                Toast.makeText(context, "Weekly quota reset back to 0 successfully!", Toast.LENGTH_LONG).show()
-                            } else {
-                                Toast.makeText(context, "Reset failed.", Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = null
-                ) {
-                    Text("Reset Weekly Claims Quota (Demo)", color = Color(0xFF007AFF), fontWeight = FontWeight.SemiBold)
-                }
+
 
                 Spacer(modifier = Modifier.weight(1f))
 

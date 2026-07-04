@@ -56,16 +56,12 @@ class FirebaseService private constructor() {
             // Student ID acts as their credentials verified by Flask backend, default password is "12345678"
             auth.signInWithEmailAndPassword(lowercasedEmail, "12345678")
                 .addOnSuccessListener {
-                    currentUserEmail.value = lowercasedEmail
-                    currentStudentId.value = studentId
                     callback(Result.success(studentId))
                 }
                 .addOnFailureListener {
                     // Try to auto-create user for seamless lecturer testing fallback
                     auth.createUserWithEmailAndPassword(lowercasedEmail, "12345678")
                         .addOnSuccessListener {
-                            currentUserEmail.value = lowercasedEmail
-                            currentStudentId.value = studentId
                             callback(Result.success(studentId))
                         }
                         .addOnFailureListener { err ->
@@ -75,11 +71,18 @@ class FirebaseService private constructor() {
         } else {
             // Offline / Simulation fallback mode
             mainHandler.postDelayed({
-                currentUserEmail.value = lowercasedEmail
-                currentStudentId.value = studentId
                 callback(Result.success(studentId))
             }, 500)
         }
+    }
+
+    /**
+     * Completes the login process by formally setting the active session variables.
+     * Should only be called AFTER SQLite verification succeeds.
+     */
+    fun setSession(email: String, studentId: String) {
+        currentUserEmail.value = email.lowercase().trim()
+        currentStudentId.value = studentId
     }
 
     /**
@@ -125,6 +128,14 @@ class FirebaseService private constructor() {
      * Deducts item quantity from Firestore after a claim is verified by Flask
      */
     fun claimInventoryItem(itemId: String) {
+        // Optimistic UI update: Decrement instantly
+        mainHandler.post {
+            val index = inventory.indexOfFirst { it.id == itemId }
+            if (index != -1 && inventory[index].quantity > 0) {
+                inventory[index] = inventory[index].copy(quantity = inventory[index].quantity - 1)
+            }
+        }
+
         if (isLiveFirebaseAvailable) {
             val db = FirebaseFirestore.getInstance()
             val docRef = db.collection("inventory").document(itemId)
@@ -137,12 +148,6 @@ class FirebaseService private constructor() {
                 null
             }.addOnFailureListener { e ->
                 e.printStackTrace()
-            }
-        } else {
-            // Offline simulation decrement
-            val index = inventory.indexOfFirst { it.id == itemId }
-            if (index != -1 && inventory[index].quantity > 0) {
-                inventory[index] = inventory[index].copy(quantity = inventory[index].quantity - 1)
             }
         }
     }
@@ -162,6 +167,18 @@ class FirebaseService private constructor() {
                 "timestamp" to com.google.firebase.Timestamp.now()
             )
             db.collection("inventory").add(itemData)
+                .addOnFailureListener {
+                    // Fallback to offline simulation if Firestore write fails (e.g., PERMISSION_DENIED rules)
+                    val newItem = FoodItem(
+                        id = UUID.randomUUID().toString(),
+                        name = name,
+                        category = category,
+                        quantity = quantity,
+                        imageUrl = imageUrl,
+                        daysToExpiry = daysToExpiry
+                    )
+                    inventory.add(0, newItem)
+                }
         } else {
             // Offline simulation addition
             val newItem = FoodItem(
@@ -177,30 +194,28 @@ class FirebaseService private constructor() {
     }
 
     /**
-     * Uploads a simulated photo and returns public URL
+     * Uploads an actual photo from Uri and returns public URL
      */
-    fun uploadDonationPhoto(imageName: String, callback: (Result<String>) -> Unit) {
-        val simulatedURL = "https://firebasestorage.googleapis.com/v0/b/smartcampuspantry.firebasestorage.app/o/donations%2F$imageName.jpg?alt=media"
+    fun uploadDonationPhoto(imageUri: android.net.Uri, callback: (Result<String>) -> Unit) {
+        val fallbackUrl = imageUri.toString()
         if (isLiveFirebaseAvailable) {
-            val storageRef = FirebaseStorage.getInstance().reference.child("donations/$imageName.jpg")
-            val dummyBytes = byteArrayOf(0)
-            storageRef.putBytes(dummyBytes)
+            val fileName = UUID.randomUUID().toString() + ".jpg"
+            val storageRef = FirebaseStorage.getInstance().reference.child("donations/$fileName")
+            
+            storageRef.putFile(imageUri)
                 .addOnSuccessListener {
                     storageRef.downloadUrl.addOnSuccessListener { uri ->
                         callback(Result.success(uri.toString()))
                     }.addOnFailureListener { err ->
-                        // Fallback to simulated URL if fetching url fails
-                        callback(Result.success(simulatedURL))
+                        callback(Result.success(fallbackUrl))
                     }
                 }
                 .addOnFailureListener { err ->
-                    // Gracefully fallback to simulated URL if Firebase Storage bucket is not enabled (404)
-                    callback(Result.success(simulatedURL))
+                    callback(Result.success(fallbackUrl))
                 }
         } else {
             mainHandler.postDelayed({
-                val simulatedURL = "https://firebasestorage.googleapis.com/v0/b/smartcampuspantry.firebasestorage.app/o/donations%2F$imageName.jpg?alt=media"
-                callback(Result.success(simulatedURL))
+                callback(Result.success(fallbackUrl))
             }, 800)
         }
     }

@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.university.smartcampuspantry.app-mergeDebugResources-51:/values-az/values-az.xml",
+            "outputFile": "com.university.smartcampuspantry.app-mergeDebugResources-52:/values-az/values-az.xml",
             "map": [
                 {
                     "source": "C:\\Users\\User\\.gradle\\caches\\8.13\\transforms\\eb7cdcf61eac90854f5333c49f3e5417\\transformed\\browser-1.4.0\\res\\values-az\\values-az.xml",
