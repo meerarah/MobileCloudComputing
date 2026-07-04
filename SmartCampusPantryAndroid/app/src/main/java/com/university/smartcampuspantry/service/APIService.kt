@@ -16,8 +16,8 @@ class APIService {
         val shared = APIService()
     }
 
-    // Default to Android Emulator host loopback address mapping to localhost on machine
-    var baseURL: String = "http://10.0.2.2:5000"
+    // Point to the live Vercel deployment!
+    var baseURL: String = "https://mobile-cloud-computing-4u8u.vercel.app"
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
