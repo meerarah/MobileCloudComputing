@@ -36,6 +36,15 @@ SIMULATED_FOOD_MODELS = [
     {"keywords": ["pasta", "spaghetti", "box"], "name": "Spaghetti Pasta", "category": "Grains", "shelf_life": 240}
 ]
 
+@app.after_request
+def add_header(response):
+    # Prevent caching for API responses
+    if request.path.startswith('/api/'):
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
+
 @app.route('/')
 def home():
     """Index page rendering the Central Admin Dashboard console."""
