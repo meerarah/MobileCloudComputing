@@ -2,8 +2,9 @@ from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 import random
 import os
+from config import get_firestore_client
 import datetime
-from config import get_db_connection
+import uuid
 
 app = Flask(__name__)
 CORS(app)
@@ -67,60 +68,61 @@ def api_info():
 
 @app.route('/api/students', methods=['GET'])
 def get_all_students():
-    """Retrieves all student profiles from SQLite database (for the Admin Portal)."""
-    conn = get_db_connection()
-    students = conn.execute('SELECT * FROM students').fetchall()
-    conn.close()
-    
-    students_list = []
-    for s in students:
-        students_list.append({
-            "studentId": s['student_id'],
-            "name": s['name'],
-            "phone": s['phone'],
-            "eligible": bool(s['eligible']),
-            "impactPoints": s['impact_points'],
-            "claimsThisWeek": s['claims_this_week']
-        })
+    """Retrieves all student profiles from Firestore database (for the Admin Portal)."""
+    try:
+        db = get_firestore_client()
+        docs = db.collection('students').stream()
         
-    return jsonify({
-        "success": True,
-        "students": students_list
-    })
+        students_list = []
+        for doc in docs:
+            s = doc.to_dict()
+            students_list.append({
+                "studentId": s.get('student_id', doc.id),
+                "name": s.get('name', ''),
+                "phone": s.get('phone', ''),
+                "eligible": bool(s.get('eligible', 1)),
+                "impactPoints": s.get('impact_points', 0),
+                "claimsThisWeek": s.get('claims_this_week', 0)
+            })
+            
+        return jsonify({
+            "success": True,
+            "students": students_list
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/api/student/<student_id>', methods=['GET'])
 def get_student(student_id):
-    """Retrieves student details, eligibility, impact points, and claim counts from SQLite."""
-    conn = get_db_connection()
-    student = conn.execute('SELECT * FROM students WHERE student_id = ?', (student_id,)).fetchone()
-    conn.close()
+    """Retrieves student details, eligibility, impact points, and claim counts from Firestore."""
+    db = get_firestore_client()
+    doc_ref = db.collection('students').document(student_id)
+    doc = doc_ref.get()
     
-    if student is None:
+    if not doc.exists:
         record_log("GET", f"/api/student/{student_id}", f"Failed to fetch profile: ID not found", 404)
         return jsonify({
             "success": False,
             "message": f"Student with ID {student_id} not found."
         }), 404
         
-    record_log("GET", f"/api/student/{student_id}", f"Fetched student profile: {student['name']}", 200)
+    student = doc.to_dict()
+    record_log("GET", f"/api/student/{student_id}", f"Fetched student profile: {student.get('name')}", 200)
     return jsonify({
         "success": True,
-        "studentId": student['student_id'],
-        "name": student['name'],
-        "eligible": bool(student['eligible']),
-        "impactPoints": student['impact_points'],
-        "claimsThisWeek": student['claims_this_week'],
+        "studentId": student.get('student_id', student_id),
+        "name": student.get('name', ''),
+        "eligible": bool(student.get('eligible', 1)),
+        "impactPoints": student.get('impact_points', 0),
+        "claimsThisWeek": student.get('claims_this_week', 0),
         "maxWeeklyClaims": 3
     })
 
 @app.route('/api/student/<student_id>', methods=['DELETE'])
 def delete_student(student_id):
-    """Deletes a student profile from SQLite."""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM students WHERE student_id = ?', (student_id,))
-    conn.commit()
-    conn.close()
+    """Deletes a student profile from Firestore."""
+    db = get_firestore_client()
+    db.collection('students').document(student_id).delete()
     
     record_log("DELETE", f"/api/student/{student_id}", f"Deleted student profile", 200)
     return jsonify({
@@ -130,29 +132,26 @@ def delete_student(student_id):
 
 @app.route('/api/student/<student_id>', methods=['PUT'])
 def update_student(student_id):
-    """Updates a student's profile details."""
+    """Updates a student's profile details in Firestore."""
     data = request.json or {}
     
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    student = cursor.execute('SELECT * FROM students WHERE student_id = ?', (student_id,)).fetchone()
-    if not student:
-        conn.close()
+    db = get_firestore_client()
+    doc_ref = db.collection('students').document(student_id)
+    doc = doc_ref.get()
+    
+    if not doc.exists:
         return jsonify({"success": False, "message": "Student not found"}), 404
         
-    new_name = data.get('name', student['name'])
-    new_phone = data.get('phone', student['phone'])
-    new_points = data.get('impactPoints', student['impact_points'])
+    student = doc.to_dict()
+    new_name = data.get('name', student.get('name'))
+    new_phone = data.get('phone', student.get('phone'))
+    new_points = data.get('impactPoints', student.get('impact_points'))
     
-    # We can also update claims if desired, but we'll focus on name, phone, points
-    cursor.execute('''
-        UPDATE students
-        SET name = ?, phone = ?, impact_points = ?
-        WHERE student_id = ?
-    ''', (new_name, new_phone, new_points, student_id))
-    
-    conn.commit()
-    conn.close()
+    doc_ref.update({
+        "name": new_name,
+        "phone": new_phone,
+        "impact_points": new_points
+    })
     
     record_log("PUT", f"/api/student/{student_id}", f"Updated student profile", 200)
     return jsonify({
@@ -162,7 +161,7 @@ def update_student(student_id):
 
 @app.route('/api/student/toggle', methods=['POST'])
 def toggle_student_eligibility():
-    """Admin feature: Toggles a student's eligibility status inside SQLite database."""
+    """Admin feature: Toggles a student's eligibility status inside Firestore database."""
     data = request.json or {}
     student_id = data.get('studentId')
     
@@ -170,21 +169,20 @@ def toggle_student_eligibility():
         record_log("POST", "/api/student/toggle", "Failed toggle request: Missing studentId", 400)
         return jsonify({"success": False, "message": "Missing studentId"}), 400
         
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    db = get_firestore_client()
+    doc_ref = db.collection('students').document(student_id)
+    doc = doc_ref.get()
     
-    student = cursor.execute('SELECT eligible, name FROM students WHERE student_id = ?', (student_id,)).fetchone()
-    if not student:
-        conn.close()
+    if not doc.exists:
         record_log("POST", "/api/student/toggle", f"Failed toggle request: Student {student_id} not found", 404)
         return jsonify({"success": False, "message": "Student not found"}), 404
         
-    new_status = 0 if student['eligible'] else 1
-    cursor.execute('UPDATE students SET eligible = ? WHERE student_id = ?', (new_status, student_id))
-    conn.commit()
-    conn.close()
+    student = doc.to_dict()
+    new_status = 0 if student.get('eligible', 1) else 1
     
-    record_log("POST", "/api/student/toggle", f"Toggled student eligibility: {student['name']} ({student_id}) to {'Eligible' if new_status else 'Suspended'}", 200)
+    doc_ref.update({"eligible": new_status})
+    
+    record_log("POST", "/api/student/toggle", f"Toggled student eligibility: {student.get('name')} ({student_id}) to {'Eligible' if new_status else 'Suspended'}", 200)
     return jsonify({
         "success": True,
         "eligible": bool(new_status),
@@ -193,7 +191,7 @@ def toggle_student_eligibility():
 
 @app.route('/api/register', methods=['POST'])
 def register_student():
-    """Registers a new student profile in the SQLite database."""
+    """Registers a new student profile in the Firestore database."""
     data = request.json or {}
     student_id = data.get('studentId')
     name = data.get('name')
@@ -203,22 +201,23 @@ def register_student():
         record_log("POST", "/api/register", "Registration rejected: Missing studentId, name, or phone", 400)
         return jsonify({"success": False, "message": "Missing required fields: studentId, name, and phone"}), 400
         
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    db = get_firestore_client()
+    doc_ref = db.collection('students').document(student_id)
+    doc = doc_ref.get()
     
     # Check if student already exists
-    existing = cursor.execute('SELECT student_id FROM students WHERE student_id = ?', (student_id,)).fetchone()
-    if existing:
-        conn.close()
+    if doc.exists:
         record_log("POST", "/api/register", f"Registration failed: Student {student_id} is already registered", 400)
         return jsonify({"success": False, "message": f"Student ID '{student_id}' is already registered."}), 400
         
-    cursor.execute('''
-        INSERT INTO students (student_id, name, phone, eligible, impact_points, claims_this_week)
-        VALUES (?, ?, ?, 1, 0, 0)
-    ''', (student_id, name, phone))
-    conn.commit()
-    conn.close()
+    doc_ref.set({
+        "student_id": student_id,
+        "name": name,
+        "phone": phone,
+        "eligible": 1,
+        "impact_points": 0,
+        "claims_this_week": 0
+    })
     
     record_log("POST", "/api/register", f"Registered student: {name} ({student_id}) with phone {phone}", 200)
     return jsonify({
@@ -245,70 +244,66 @@ def process_claim():
             "message": "Missing required fields: studentId and itemId"
         }), 400
         
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    db = get_firestore_client()
+    student_ref = db.collection('students').document(student_id)
+    student_doc = student_ref.get()
     
     # 1. Fetch student record
-    student = cursor.execute('SELECT * FROM students WHERE student_id = ?', (student_id,)).fetchone()
-    
-    if student is None:
-        conn.close()
+    if not student_doc.exists:
         record_log("POST", "/api/claim", f"Claim rejected: student ID {student_id} not registered", 404)
         return jsonify({
             "success": False,
             "message": f"Student ID '{student_id}' is not registered in the system."
         }), 404
         
+    student = student_doc.to_dict()
+    
     # 2. Check general eligibility (suspensions, academic hold, etc.)
-    if not student['eligible']:
-        conn.close()
-        record_log("POST", "/api/claim", f"Claim rejected: {student['name']} ({student_id}) is suspended", 403)
+    if not student.get('eligible', 1):
+        record_log("POST", "/api/claim", f"Claim rejected: {student.get('name')} ({student_id}) is suspended", 403)
         return jsonify({
             "success": False,
             "message": "Access Denied: Student account is currently not eligible for pantry claims."
         }), 403
         
     # 3. Check weekly limit (MCC business logic rule: Max 3 claims per week)
-    current_claims = student['claims_this_week']
+    current_claims = student.get('claims_this_week', 0)
     if current_claims >= 3:
-        conn.close()
-        record_log("POST", "/api/claim", f"Claim rejected: {student['name']} has reached weekly quota limit (3/3)", 400)
+        record_log("POST", "/api/claim", f"Claim rejected: {student.get('name')} has reached weekly quota limit (3/3)", 400)
         return jsonify({
             "success": False,
-            "message": f"Claim Rejected: Student '{student['name']}' has already reached the weekly limit of 3 claims."
+            "message": f"Claim Rejected: Student '{student.get('name')}' has already reached the weekly limit of 3 claims."
         }), 400
         
     # 4. Success Path: Increment claim count, award 15 impact points for proper checkout
     new_claims_count = current_claims + 1
-    new_points = student['impact_points'] + 15
+    new_points = student.get('impact_points', 0) + 15
     
     try:
         # Update student record
-        cursor.execute('''
-            UPDATE students 
-            SET claims_this_week = ?, impact_points = ?
-            WHERE student_id = ?
-        ''', (new_claims_count, new_points, student_id))
+        student_ref.update({
+            "claims_this_week": new_claims_count,
+            "impact_points": new_points
+        })
         
         # Log claim transaction
-        cursor.execute('''
-            INSERT INTO claims (student_id, item_id, item_name, location)
-            VALUES (?, ?, ?, ?)
-        ''', (student_id, item_id, item_name, location))
+        claim_id = str(uuid.uuid4())
+        db.collection('claims').document(claim_id).set({
+            "claim_id": claim_id,
+            "student_id": student_id,
+            "item_name": item_name,
+            "location": location,
+            "timestamp": datetime.datetime.now().isoformat()
+        })
         
-        conn.commit()
-        record_log("POST", "/api/claim", f"Claim APPROVED: {student['name']} pickup '{item_name}' at {location} (Remaining: {3 - new_claims_count})", 200)
+        record_log("POST", "/api/claim", f"Claim APPROVED: {student.get('name')} pickup '{item_name}' at {location} (Remaining: {3 - new_claims_count})", 200)
     except Exception as e:
-        conn.rollback()
-        conn.close()
-        record_log("POST", "/api/claim", f"Claim failed: Internal SQLite Database error: {str(e)}", 500)
+        record_log("POST", "/api/claim", f"Claim failed: Internal Firestore Database error: {str(e)}", 500)
         return jsonify({
             "success": False,
             "message": f"Internal database error occurred: {str(e)}"
         }), 500
         
-    conn.close()
-    
     return jsonify({
         "success": True,
         "message": f"Claim for '{item_name}' approved successfully!",
@@ -377,56 +372,64 @@ def award_donation_points():
         record_log("POST", "/api/donate-points", "Donation failed: Missing studentId", 400)
         return jsonify({"success": False, "message": "Missing studentId"}), 400
         
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    db = get_firestore_client()
+    student_ref = db.collection('students').document(student_id)
+    doc = student_ref.get()
     
-    student = cursor.execute('SELECT * FROM students WHERE student_id = ?', (student_id,)).fetchone()
-    if not student:
-        conn.close()
+    if not doc.exists:
         record_log("POST", "/api/donate-points", f"Donation failed: Student {student_id} not registered", 404)
         return jsonify({"success": False, "message": "Student not found"}), 404
         
-    new_points = student['impact_points'] + points
-    cursor.execute('UPDATE students SET impact_points = ? WHERE student_id = ?', (new_points, student_id))
+    student = doc.to_dict()
+    new_points = student.get('impact_points', 0) + points
+    student_ref.update({"impact_points": new_points})
     
-    # Record restock history in SQLite
-    cursor.execute('''
-        INSERT INTO restocks (restocker_name, item_name, quantity, image_url, location)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (student['name'], item_name, quantity, image_url, location))
+    # Record restock history in Firestore
+    restock_id = str(uuid.uuid4())
+    db.collection('restocks').document(restock_id).set({
+        "restock_id": restock_id,
+        "restocker_name": student.get('name', 'Unknown'),
+        "item_name": item_name,
+        "quantity": quantity,
+        "image_url": image_url,
+        "location": location,
+        "timestamp": datetime.datetime.now().isoformat()
+    })
     
-    conn.commit()
-    conn.close()
-    
-    record_log("POST", "/api/donate-points", f"Restocked: {student['name']} added {quantity}x {item_name} at {location} (+{points} pts)", 200)
+    record_log("POST", "/api/donate-points", f"Restocked: {student.get('name')} added {quantity}x {item_name} at {location} (+{points} pts)", 200)
     return jsonify({
         "success": True,
-        "message": f"Successfully awarded {points} points to {student['name']}!",
+        "message": f"Successfully awarded {points} points to {student.get('name')}!",
         "newPoints": new_points
     })
 
 @app.route('/api/claims', methods=['GET'])
 def get_all_claims():
-    """Retrieves all claims (checkout records) with student info from SQLite database."""
-    conn = get_db_connection()
-    claims = conn.execute('''
-        SELECT c.claim_id, c.student_id, s.name, s.phone, c.item_name, c.location, c.timestamp
-        FROM claims c
-        JOIN students s ON c.student_id = s.student_id
-        ORDER BY c.timestamp DESC
-    ''').fetchall()
-    conn.close()
-    
+    """Retrieves all claims (checkout records) from Firestore database."""
+    db = get_firestore_client()
+    # In Firestore, we store student name in claims, or we fetch it. 
+    # To keep it simple, we'll fetch claims and students and join them in memory, or just return claim data.
+    # We will fetch students first to map studentId -> student data
+    students_dict = {}
+    for doc in db.collection('students').stream():
+        students_dict[doc.id] = doc.to_dict()
+        
     claims_list = []
-    for c in claims:
+    # Fetch claims ordered by timestamp descending
+    claims_query = db.collection('claims').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
+    for doc in claims_query:
+        c = doc.to_dict()
+        student_id = c.get('student_id')
+        student = students_dict.get(student_id, {})
+        
         claims_list.append({
-            "claimId": c['claim_id'],
-            "studentId": c['student_id'],
-            "name": c['name'],
-            "phone": c['phone'],
-            "itemName": c['item_name'],
-            "location": c['location'],
-            "timestamp": c['timestamp']
+            "claimId": c.get('claim_id', doc.id),
+            "studentId": student_id,
+            "name": student.get('name', 'Unknown'),
+            "phone": student.get('phone', 'Unknown'),
+            "itemName": c.get('item_name'),
+            "location": c.get('location'),
+            "timestamp": c.get('timestamp')
         })
         
     return jsonify({
@@ -436,21 +439,21 @@ def get_all_claims():
 
 @app.route('/api/restocks', methods=['GET'])
 def get_all_restocks():
-    """Retrieves all restocking records from SQLite database."""
-    conn = get_db_connection()
-    restocks = conn.execute('SELECT * FROM restocks ORDER BY timestamp DESC').fetchall()
-    conn.close()
+    """Retrieves all restocking records from Firestore database."""
+    db = get_firestore_client()
+    restocks_query = db.collection('restocks').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
     
     restocks_list = []
-    for r in restocks:
+    for doc in restocks_query:
+        r = doc.to_dict()
         restocks_list.append({
-            "restockId": r['restock_id'],
-            "restockerName": r['restocker_name'],
-            "itemName": r['item_name'],
-            "quantity": r['quantity'],
-            "imageUrl": r['image_url'],
-            "location": r['location'],
-            "timestamp": r['timestamp']
+            "restockId": r.get('restock_id', doc.id),
+            "restockerName": r.get('restocker_name'),
+            "itemName": r.get('item_name'),
+            "quantity": r.get('quantity'),
+            "imageUrl": r.get('image_url'),
+            "location": r.get('location'),
+            "timestamp": r.get('timestamp')
         })
         
     return jsonify({
@@ -460,7 +463,7 @@ def get_all_restocks():
 
 @app.route('/api/report', methods=['POST'])
 def submit_report():
-    """Receives an issue report about a pantry item from a student and logs it in SQLite."""
+    """Receives an issue report about a pantry item from a student and logs it in Firestore."""
     data = request.json or {}
     student_id = data.get('studentId')
     item_name = data.get('itemName')
@@ -471,19 +474,24 @@ def submit_report():
         record_log("POST", "/api/report", "Report failed: Missing studentId, itemName, or issue", 400)
         return jsonify({"success": False, "message": "Missing required fields: studentId, itemName, or issue"}), 400
         
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    db = get_firestore_client()
+    student_ref = db.collection('students').document(student_id)
+    doc = student_ref.get()
     
-    student = cursor.execute('SELECT name FROM students WHERE student_id = ?', (student_id,)).fetchone()
-    student_name = student['name'] if student else "Unknown Student"
-    
-    cursor.execute('''
-        INSERT INTO reports (student_id, student_name, item_name, location, issue_description)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (student_id, student_name, item_name, location, issue))
-    
-    conn.commit()
-    conn.close()
+    student_name = "Unknown Student"
+    if doc.exists:
+        student_name = doc.to_dict().get('name', 'Unknown Student')
+        
+    report_id = str(uuid.uuid4())
+    db.collection('reports').document(report_id).set({
+        "report_id": report_id,
+        "student_id": student_id,
+        "student_name": student_name,
+        "item_name": item_name,
+        "location": location,
+        "issue_description": issue,
+        "timestamp": datetime.datetime.now().isoformat()
+    })
     
     record_log("POST", "/api/report", f"Report submitted: {student_name} reported '{item_name}' at {location}: {issue}", 200)
     return jsonify({
@@ -493,21 +501,21 @@ def submit_report():
 
 @app.route('/api/reports', methods=['GET'])
 def get_all_reports():
-    """Retrieves all submitted pantry reports from SQLite database."""
-    conn = get_db_connection()
-    reports = conn.execute('SELECT * FROM reports ORDER BY timestamp DESC').fetchall()
-    conn.close()
+    """Retrieves all submitted pantry reports from Firestore database."""
+    db = get_firestore_client()
+    reports_query = db.collection('reports').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
     
     reports_list = []
-    for r in reports:
+    for doc in reports_query:
+        r = doc.to_dict()
         reports_list.append({
-            "reportId": r['report_id'],
-            "studentId": r['student_id'],
-            "studentName": r['student_name'],
-            "itemName": r['item_name'],
-            "location": r['location'],
-            "issueDescription": r['issue_description'],
-            "timestamp": r['timestamp']
+            "reportId": r.get('report_id', doc.id),
+            "studentId": r.get('student_id'),
+            "studentName": r.get('student_name'),
+            "itemName": r.get('item_name'),
+            "location": r.get('location'),
+            "issueDescription": r.get('issue_description'),
+            "timestamp": r.get('timestamp')
         })
         
     return jsonify({
@@ -518,23 +526,23 @@ def get_all_reports():
 @app.route('/api/student/<student_id>/reset-quota', methods=['PUT'])
 def reset_student_quota(student_id):
     """Resets the weekly claim counter for a specific student."""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('UPDATE students SET claims_this_week = 0 WHERE student_id = ?', (student_id,))
-    conn.commit()
-    conn.close()
+    db = get_firestore_client()
+    db.collection('students').document(student_id).update({"claims_this_week": 0})
     
     record_log("PUT", f"/api/student/{student_id}/reset-quota", f"Admin action: Reset weekly claim quota for {student_id}", 200)
     return jsonify({"success": True, "message": f"Quota for student {student_id} reset successfully."})
 
 @app.route('/api/reset-claims', methods=['POST'])
 def reset_claims():
-    """Helper to reset weekly claim counters for testing."""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('UPDATE students SET claims_this_week = 0')
-    conn.commit()
-    conn.close()
+    """Helper to reset weekly claim counters for all students."""
+    db = get_firestore_client()
+    students = db.collection('students').stream()
+    
+    # Firestore doesn't have a single "update all" query, we must batch it or loop
+    batch = db.batch()
+    for doc in students:
+        batch.update(doc.reference, {"claims_this_week": 0})
+    batch.commit()
     
     record_log("POST", "/api/reset-claims", "Admin action: Reset weekly claim counters for all students to 0", 200)
     return jsonify({

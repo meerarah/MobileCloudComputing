@@ -1,21 +1,23 @@
 import os
-import shutil
-import sqlite3
+import json
+import firebase_admin
+from firebase_admin import credentials, firestore
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Check if running in a serverless environment (like Vercel)
-if os.environ.get('VERCEL') or os.environ.get('NOW_REGION'):
-    DB_PATH = '/tmp/database.db'
-    source_db = os.path.join(BASE_DIR, 'database.db')
-    # Copy pre-seeded SQLite database to writable /tmp directory if it doesn't exist yet
-    if not os.path.exists(DB_PATH) and os.path.exists(source_db):
-        shutil.copy2(source_db, DB_PATH)
-else:
-    DB_PATH = os.path.join(BASE_DIR, 'database.db')
-
-def get_db_connection():
-    """Establishes a connection to the SQLite database with row factory enabled."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+def get_firestore_client():
+    """Initializes Firebase Admin SDK and returns a Firestore client."""
+    if not firebase_admin._apps:
+        service_account_str = os.environ.get('FIREBASE_SERVICE_ACCOUNT')
+        if service_account_str:
+            cred_dict = json.loads(service_account_str)
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred)
+        else:
+            # Fallback to local json for development if it exists
+            local_key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'serviceAccountKey.json')
+            if os.path.exists(local_key_path):
+                cred = credentials.Certificate(local_key_path)
+                firebase_admin.initialize_app(cred)
+            else:
+                raise Exception("Missing FIREBASE_SERVICE_ACCOUNT environment variable and no local serviceAccountKey.json found.")
+    
+    return firestore.client()
