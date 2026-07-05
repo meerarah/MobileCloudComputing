@@ -248,7 +248,7 @@ async function fetchClaims() {
     if (!tableBody) return;
 
     try {
-        const response = await fetch(`${API_BASE}/api/claims`);
+        const response = await fetch(`${API_BASE}/api/claims`, { cache: 'no-store' });
         const data = await response.json();
         
         if (data.success) {
@@ -287,7 +287,7 @@ async function fetchRestocks() {
     if (!container) return;
 
     try {
-        const response = await fetch(`${API_BASE}/api/restocks`);
+        const response = await fetch(`${API_BASE}/api/restocks`, { cache: 'no-store' });
         const data = await response.json();
         
         if (data.success) {
@@ -348,7 +348,7 @@ async function fetchReports() {
     if (!tableBody) return;
 
     try {
-        const response = await fetch(`${API_BASE}/api/reports`);
+        const response = await fetch(`${API_BASE}/api/reports`, { cache: 'no-store' });
         const data = await response.json();
         
         if (data.success) {
@@ -388,7 +388,7 @@ async function fetchStudents() {
     if (!tableBody) return;
 
     try {
-        const response = await fetch(`${API_BASE}/api/students`);
+        const response = await fetch(`${API_BASE}/api/students`, { cache: 'no-store' });
         const data = await response.json();
         
         if (data.success) {
