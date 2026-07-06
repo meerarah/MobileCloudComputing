@@ -27,6 +27,9 @@ fun ProfileScreen(onSignOutClick: () -> Unit) {
 
     var profile by remember { mutableStateOf<StudentProfile?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var showCouponDialog by remember { mutableStateOf(false) }
+    var redeemedCouponCode by remember { mutableStateOf("") }
+    var isRedeeming by remember { mutableStateOf(false) }
 
     fun refreshProfile() {
         val studentId = firebaseService.currentStudentId.value ?: return
@@ -144,6 +147,33 @@ fun ProfileScreen(onSignOutClick: () -> Unit) {
                                     .height(8.dp)
                             )
                         }
+                        
+                        // Rewards Section
+                        if (p.impactPoints >= 200) {
+                            Divider()
+                            Button(
+                                onClick = {
+                                    isRedeeming = true
+                                    apiService.redeemCoupon(p.studentId) { result ->
+                                        isRedeeming = false
+                                        if (result.isSuccess) {
+                                            val json = result.getOrThrow()
+                                            redeemedCouponCode = json.optString("couponCode", "UITM-CARES-XXXX")
+                                            showCouponDialog = true
+                                            refreshProfile()
+                                        } else {
+                                            Toast.makeText(context, "Failed to redeem: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF34C759)),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.fillMaxWidth().height(50.dp),
+                                enabled = !isRedeeming
+                            ) {
+                                Text(if (isRedeeming) "Redeeming..." else "Redeem Coupon (200 pts)", fontWeight = FontWeight.Bold)
+                            }
+                        }
                     }
                 }
 
@@ -167,6 +197,33 @@ fun ProfileScreen(onSignOutClick: () -> Unit) {
                 }
             }
         }
+    }
+    
+    if (showCouponDialog) {
+        AlertDialog(
+            onDismissRequest = { showCouponDialog = false },
+            title = { Text("🎉 Reward Unlocked!") },
+            text = {
+                Column {
+                    Text("Show this coupon code to the campus cafe for a free meal or drink!")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFF4F7FC), RoundedCornerShape(8.dp))
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(redeemedCouponCode, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF101A2C), textAlign = TextAlign.Center)
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = { showCouponDialog = false }) {
+                    Text("Awesome!")
+                }
+            }
+        )
     }
 }
 

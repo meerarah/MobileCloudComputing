@@ -197,10 +197,12 @@ def register_student():
     student_id = data.get('studentId')
     name = data.get('name')
     phone = data.get('phone')
+    email = data.get('email')
+    password = data.get('password')
     
-    if not student_id or not name or not phone:
-        record_log("POST", "/api/register", "Registration rejected: Missing studentId, name, or phone", 400)
-        return jsonify({"success": False, "message": "Missing required fields: studentId, name, and phone"}), 400
+    if not student_id or not name or not phone or not email or not password:
+        record_log("POST", "/api/register", "Registration rejected: Missing required fields", 400)
+        return jsonify({"success": False, "message": "Missing required fields: studentId, name, phone, email, or password"}), 400
         
     db = get_firestore_client()
     doc_ref = db.collection('students').document(student_id)
@@ -215,6 +217,8 @@ def register_student():
         "student_id": student_id,
         "name": name,
         "phone": phone,
+        "email": email.lower().strip(),
+        "password": password,
         "eligible": 1,
         "impact_points": 0,
         "claims_this_week": 0
@@ -224,6 +228,61 @@ def register_student():
     return jsonify({
         "success": True,
         "message": "Student registered successfully in the system!"
+    })
+
+@app.route('/api/student/by-email', methods=['GET'])
+def get_student_by_email():
+    """Retrieves a student profile by their email address."""
+    email = request.args.get('email', '').strip().lower()
+    if not email:
+        return jsonify({"success": False, "message": "Missing email"}), 400
+        
+    db = get_firestore_client()
+    docs = db.collection('students').where(filter=firestore.FieldFilter('email', '==', email)).limit(1).stream()
+    
+    for doc in docs:
+        data = doc.to_dict()
+        return jsonify({
+            "success": True,
+            "studentId": data.get('student_id', doc.id),
+            "name": data.get('name'),
+            "phone": data.get('phone'),
+            "eligible": bool(data.get('eligible', 1)),
+            "impactPoints": data.get('impact_points', 0),
+            "claimsThisWeek": data.get('claims_this_week', 0)
+        })
+        
+    return jsonify({"success": False, "message": "Student not found"}), 404
+
+@app.route('/api/admin/restock', methods=['POST'])
+def admin_restock():
+    """Restocks a location by refilling all items in the inventory collection for that location."""
+    data = request.json or {}
+    location_id = data.get('locationId')
+    
+    if not location_id:
+        return jsonify({"success": False, "message": "Missing locationId"}), 400
+        
+    db = get_firestore_client()
+    inventory_ref = db.collection('inventory')
+    
+    # We'll just restock EVERYTHING to 10 to simulate a full restock for that location.
+    # Note: the app's inventory items don't have a specific location field in this mock, so we'll restock all items if location_id is loc_1.
+    docs = inventory_ref.stream()
+    batch = db.batch()
+    restocked_count = 0
+    
+    for doc in docs:
+        batch.update(doc.reference, {"quantity": 20})
+        restocked_count += 1
+        
+    if restocked_count > 0:
+        batch.commit()
+        
+    record_log("POST", "/api/admin/restock", f"Admin restocked {restocked_count} items at {location_id}", 200)
+    return jsonify({
+        "success": True,
+        "message": f"Successfully restocked {restocked_count} items!"
     })
 
 @app.route('/api/claim', methods=['POST'])

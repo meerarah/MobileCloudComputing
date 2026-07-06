@@ -17,7 +17,7 @@ class APIService {
     }
 
     // Point to the live Vercel deployment!
-    var baseURL: String = "https://mobile-cloud-computing-4u8u.vercel.app"
+    var baseURL: String = "https://smartcampuspantry-mobile-cloud-comp.vercel.app"
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -42,7 +42,7 @@ class APIService {
                         eligible = json.getBoolean("eligible"),
                         impactPoints = json.getInt("impactPoints"),
                         claimsThisWeek = json.getInt("claimsThisWeek"),
-                        maxWeeklyClaims = json.getInt("maxWeeklyClaims")
+                        maxWeeklyClaims = json.optInt("maxWeeklyClaims", 3)
                     )
                     mainHandler.post { callback(Result.success(profile)) }
                 } else {
@@ -51,6 +51,44 @@ class APIService {
                     errorReader.close()
                     val json = JSONObject(errorText)
                     val msg = json.optString("message", "Error loading profile")
+                    mainHandler.post { callback(Result.failure(Exception(msg))) }
+                }
+            } catch (e: Exception) {
+                mainHandler.post { callback(Result.failure(e)) }
+            }
+        }
+    }
+
+    fun fetchStudentProfileByEmail(email: String, callback: (Result<StudentProfile>) -> Unit) {
+        thread {
+            try {
+                val urlObj = URL("$baseURL/api/student/by-email?email=$email")
+                val conn = urlObj.openConnection() as HttpURLConnection
+                conn.requestMethod = "GET"
+                conn.connectTimeout = 5000
+
+                if (conn.responseCode == 200) {
+                    val reader = BufferedReader(InputStreamReader(conn.inputStream))
+                    val response = reader.readText()
+                    reader.close()
+
+                    val json = JSONObject(response)
+                    val profile = StudentProfile(
+                        success = json.getBoolean("success"),
+                        studentId = json.getString("studentId"),
+                        name = json.getString("name"),
+                        eligible = json.getBoolean("eligible"),
+                        impactPoints = json.getInt("impactPoints"),
+                        claimsThisWeek = json.getInt("claimsThisWeek"),
+                        maxWeeklyClaims = json.optInt("maxWeeklyClaims", 3)
+                    )
+                    mainHandler.post { callback(Result.success(profile)) }
+                } else {
+                    val errorReader = BufferedReader(InputStreamReader(conn.errorStream))
+                    val errorText = errorReader.readText()
+                    errorReader.close()
+                    val json = JSONObject(errorText)
+                    val msg = json.optString("message", "Error loading profile by email")
                     mainHandler.post { callback(Result.failure(Exception(msg))) }
                 }
             } catch (e: Exception) {
@@ -229,7 +267,45 @@ class APIService {
         }
     }
 
-    fun registerStudent(studentId: String, name: String, phone: String, callback: (Result<JSONObject>) -> Unit) {
+    fun redeemCoupon(studentId: String, callback: (Result<JSONObject>) -> Unit) {
+        thread {
+            try {
+                val urlObj = URL("$baseURL/api/redeem-coupon")
+                val conn = urlObj.openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.setRequestProperty("Content-Type", "application/json")
+                conn.doOutput = true
+                conn.connectTimeout = 5000
+
+                val payload = JSONObject().apply {
+                    put("studentId", studentId)
+                }
+
+                val writer = OutputStreamWriter(conn.outputStream)
+                writer.write(payload.toString())
+                writer.flush()
+                writer.close()
+
+                val responseCode = conn.responseCode
+                val stream = if (responseCode == 200) conn.inputStream else conn.errorStream
+                val reader = BufferedReader(InputStreamReader(stream))
+                val response = reader.readText()
+                reader.close()
+
+                val json = JSONObject(response)
+                if (responseCode == 200) {
+                    mainHandler.post { callback(Result.success(json)) }
+                } else {
+                    val msg = json.optString("message", "Failed to redeem coupon")
+                    mainHandler.post { callback(Result.failure(Exception(msg))) }
+                }
+            } catch (e: Exception) {
+                mainHandler.post { callback(Result.failure(e)) }
+            }
+        }
+    }
+
+    fun registerStudent(studentId: String, name: String, phone: String, email: String, password: String, callback: (Result<JSONObject>) -> Unit) {
         thread {
             try {
                 val urlObj = URL("$baseURL/api/register")
@@ -243,6 +319,8 @@ class APIService {
                     put("studentId", studentId)
                     put("name", name)
                     put("phone", phone)
+                    put("email", email)
+                    put("password", password)
                 }
 
                 val writer = OutputStreamWriter(conn.outputStream)

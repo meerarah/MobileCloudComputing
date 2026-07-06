@@ -15,6 +15,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.university.smartcampuspantry.service.APIService
@@ -27,6 +29,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     
     // Form Inputs
     var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     var studentId by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -127,10 +131,11 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         )
                         OutlinedTextField(
                             value = email,
-                            onValueChange = { email = it.replace("@student.uitm.edu.my", "").trim() },
-                            placeholder = { Text("username") },
+                            onValueChange = { email = it.trim() },
+                            placeholder = { Text("username@student.uitm.edu.my", color = Color.Gray) },
                             singleLine = true,
-                            suffix = { Text("@student.uitm.edu.my", color = Color.Gray) },
+                            maxLines = 1,
+                            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 14.sp),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Email,
                                 imeAction = ImeAction.Next
@@ -155,7 +160,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             OutlinedTextField(
                                 value = name,
                                 onValueChange = { name = it },
-                                placeholder = { Text("Muhammad Ali") },
+                                placeholder = { Text("Muhammad Ali", color = Color.Gray) },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Text,
@@ -179,7 +184,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             OutlinedTextField(
                                 value = phone,
                                 onValueChange = { phone = it },
-                                placeholder = { Text("+6012-3456789") },
+                                placeholder = { Text("+6012-3456789", color = Color.Gray) },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Phone,
@@ -194,21 +199,54 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         }
                     }
 
-                    // Student ID Field
+                    // Student ID Field (Only for registration)
+                    if (isRegisterMode) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = "STUDENT ID",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Gray
+                            )
+                            OutlinedTextField(
+                                value = studentId,
+                                onValueChange = { studentId = it },
+                                placeholder = { Text("std_1001", color = Color.Gray) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Next
+                                ),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFF007AFF),
+                                    unfocusedBorderColor = Color(0xFFE2E8F0)
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+
+                    // Password Field
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
-                            text = "STUDENT ID",
+                            text = "PASSWORD",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Gray
                         )
                         OutlinedTextField(
-                            value = studentId,
-                            onValueChange = { studentId = it },
-                            placeholder = { Text("std_1001") },
+                            value = password,
+                            onValueChange = { password = it },
+                            placeholder = { Text("********", color = Color.Gray) },
                             singleLine = true,
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Text(if (passwordVisible) "🙈" else "👁️")
+                                }
+                            },
                             keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Text,
+                                keyboardType = KeyboardType.Password,
                                 imeAction = ImeAction.Done
                             ),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -234,18 +272,18 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             errorMessage = ""
                             if (isRegisterMode) {
                                 // Registration path
-                                if (email.isBlank() || name.isBlank() || phone.isBlank() || studentId.isBlank()) {
+                                if (email.isBlank() || name.isBlank() || phone.isBlank() || studentId.isBlank() || password.isBlank()) {
                                     errorMessage = "Please fill in all registration fields."
                                     return@Button
                                 }
-                                val fullEmail = if (email.endsWith("@student.uitm.edu.my")) email else "$email@student.uitm.edu.my"
+                                val fullEmail = email
                                 
                                 isLoading = true
                                 // 1. Register student in SQLite backend
-                                APIService.shared.registerStudent(studentId, name, phone) { regResult ->
+                                APIService.shared.registerStudent(studentId, name, phone, fullEmail, password) { regResult ->
                                     if (regResult.isSuccess) {
                                         // 2. Sign in/create in Firebase Auth
-                                        firebaseService.signIn(fullEmail, studentId) { authResult ->
+                                        firebaseService.signIn(fullEmail, password) { authResult ->
                                             isLoading = false
                                             if (authResult.isSuccess) {
                                                 firebaseService.setSession(fullEmail, studentId)
@@ -262,20 +300,20 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                                 }
                             } else {
                                 // Sign-in path
-                                if (email.isBlank() || studentId.isBlank()) {
-                                    errorMessage = "Please enter both Email and Student ID."
+                                if (email.isBlank() || password.isBlank()) {
+                                    errorMessage = "Please enter both Email and Password."
                                     return@Button
                                 }
-                                val fullEmail = if (email.endsWith("@student.uitm.edu.my")) email else "$email@student.uitm.edu.my"
+                                val fullEmail = email
                                 
                                 isLoading = true
-                                firebaseService.signIn(fullEmail, studentId) { result ->
+                                firebaseService.signIn(fullEmail, password) { result ->
                                     if (result.isSuccess) {
-                                        val uid = result.getOrThrow()
-                                        APIService.shared.fetchStudentProfile(uid) { profileResult ->
+                                        APIService.shared.fetchStudentProfileByEmail(fullEmail) { profileResult ->
                                             isLoading = false
                                             if (profileResult.isSuccess) {
-                                                firebaseService.setSession(fullEmail, studentId)
+                                                val profile = profileResult.getOrThrow()
+                                                firebaseService.setSession(fullEmail, profile.studentId)
                                                 onLoginSuccess()
                                             } else {
                                                 firebaseService.signOut()

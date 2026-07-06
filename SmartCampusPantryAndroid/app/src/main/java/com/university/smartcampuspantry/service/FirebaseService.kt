@@ -44,7 +44,7 @@ class FirebaseService private constructor() {
     /**
      * Signs in student with Firebase Auth. Enforces UiTM student email domain suffix.
      */
-    fun signIn(email: String, studentId: String, callback: (Result<String>) -> Unit) {
+    fun signIn(email: String, password: String, callback: (Result<String>) -> Unit) {
         val lowercasedEmail = email.lowercase().trim()
         if (!lowercasedEmail.endsWith("@student.uitm.edu.my")) {
             callback(Result.failure(Exception("Access Denied: Only UiTM student accounts (@student.uitm.edu.my) can log into the client application.")))
@@ -53,16 +53,15 @@ class FirebaseService private constructor() {
 
         if (isLiveFirebaseAvailable) {
             val auth = FirebaseAuth.getInstance()
-            // Student ID acts as their credentials verified by Flask backend, default password is "12345678"
-            auth.signInWithEmailAndPassword(lowercasedEmail, "12345678")
+            auth.signInWithEmailAndPassword(lowercasedEmail, password)
                 .addOnSuccessListener {
-                    callback(Result.success(studentId))
+                    callback(Result.success(auth.currentUser?.uid ?: ""))
                 }
                 .addOnFailureListener {
                     // Try to auto-create user for seamless lecturer testing fallback
-                    auth.createUserWithEmailAndPassword(lowercasedEmail, "12345678")
+                    auth.createUserWithEmailAndPassword(lowercasedEmail, password)
                         .addOnSuccessListener {
-                            callback(Result.success(studentId))
+                            callback(Result.success(auth.currentUser?.uid ?: ""))
                         }
                         .addOnFailureListener { err ->
                             callback(Result.failure(err))
@@ -71,7 +70,7 @@ class FirebaseService private constructor() {
         } else {
             // Offline / Simulation fallback mode
             mainHandler.postDelayed({
-                callback(Result.success(studentId))
+                callback(Result.success("offline_uid"))
             }, 500)
         }
     }

@@ -231,12 +231,29 @@ async function resetAllQuotas() {
     }
 }
 
-window.restockLocation = function(id) {
+window.restockLocation = async function(id) {
     const loc = locations.find(l => l.id === id);
-    if (loc) {
-        loc.status = "Stocked";
-        loc.lastChecked = "Just now";
-        renderLocations();
+    if (!loc) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/admin/restock`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ locationId: id })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            loc.status = "Stocked";
+            loc.lastChecked = "Just now";
+            renderLocations();
+            alert(result.message);
+        } else {
+            alert(result.message);
+        }
+    } catch (err) {
+        console.error("Error restocking:", err);
+        alert("Failed to restock location.");
     }
 };
 
@@ -452,7 +469,11 @@ function openAddStudentModal() {
     document.getElementById('modal-student-id').readOnly = false;
     document.getElementById('modal-student-name').value = "";
     document.getElementById('modal-student-phone').value = "";
+    document.getElementById('modal-student-email').value = "";
+    document.getElementById('modal-student-password').value = "";
     document.getElementById('points-group').style.display = "none";
+    document.getElementById('email-group').style.display = "block";
+    document.getElementById('password-group').style.display = "block";
     
     document.getElementById('student-modal').style.display = "flex";
 }
@@ -468,6 +489,9 @@ function openEditStudentModal(id, name, phone, points) {
     const pointsGroup = document.getElementById('points-group');
     pointsGroup.style.display = "block";
     document.getElementById('modal-student-points').value = points;
+    
+    document.getElementById('email-group').style.display = "none";
+    document.getElementById('password-group').style.display = "none";
     
     document.getElementById('student-modal').style.display = "flex";
 }
@@ -485,6 +509,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const studentId = document.getElementById('modal-student-id').value.trim();
             const name = document.getElementById('modal-student-name').value.trim();
             const phone = document.getElementById('modal-student-phone').value.trim();
+            const email = document.getElementById('modal-student-email').value.trim();
+            const password = document.getElementById('modal-student-password').value.trim();
             const points = parseInt(document.getElementById('modal-student-points').value) || 0;
             
             try {
@@ -492,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (mode === "add") {
                     url = `${API_BASE}/api/register`;
                     method = 'POST';
-                    body = { studentId, name, phone, password: "password123" }; // default password
+                    body = { studentId, name, phone, email, password };
                 } else {
                     url = `${API_BASE}/api/student/${studentId}`;
                     method = 'PUT';

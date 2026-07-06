@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
 import com.university.smartcampuspantry.service.APIService
 import com.university.smartcampuspantry.service.FirebaseService
 
@@ -87,8 +88,20 @@ fun DonationScreen() {
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(if (selectedImageUri != null) "📸 Photo Selected!" else "📸 Select Photo from Gallery")
+                        Text(if (selectedImageUri != null) "📸 Change Photo" else "📸 Select Photo from Gallery")
                     }
+                }
+
+                if (selectedImageUri != null) {
+                    coil.compose.AsyncImage(
+                        model = selectedImageUri,
+                        contentDescription = "Selected Photo",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
                 }
 
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
