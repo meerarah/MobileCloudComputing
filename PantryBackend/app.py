@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
+from google.cloud import firestore
 import random
 import os
 from config import get_firestore_client
