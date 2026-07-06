@@ -314,6 +314,45 @@ def process_claim():
         "remainingClaims": 3 - new_claims_count
     })
 
+@app.route('/api/redeem-coupon', methods=['POST'])
+def redeem_coupon():
+    """Redeems 200 impact points for a reward coupon."""
+    data = request.json or {}
+    student_id = data.get('studentId')
+    
+    if not student_id:
+        record_log("POST", "/api/redeem-coupon", "Redemption failed: Missing studentId", 400)
+        return jsonify({"success": False, "message": "Missing studentId"}), 400
+        
+    db = get_firestore_client()
+    student_ref = db.collection('students').document(student_id)
+    student_doc = student_ref.get()
+    
+    if not student_doc.exists:
+        record_log("POST", "/api/redeem-coupon", f"Redemption failed: student ID {student_id} not found", 404)
+        return jsonify({"success": False, "message": "Student not found."}), 404
+        
+    student = student_doc.to_dict()
+    current_points = student.get('impact_points', 0)
+    
+    if current_points < 200:
+        record_log("POST", "/api/redeem-coupon", f"Redemption failed: {student.get('name')} only has {current_points} pts", 400)
+        return jsonify({"success": False, "message": "Not enough points. You need at least 200 points."}), 400
+        
+    new_points = current_points - 200
+    student_ref.update({"impact_points": new_points})
+    
+    import string
+    coupon_code = "UITM-CARES-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+    
+    record_log("POST", "/api/redeem-coupon", f"Coupon Redeemed: {student.get('name')} spent 200 pts (Code: {coupon_code})", 200)
+    return jsonify({
+        "success": True,
+        "message": "Coupon redeemed successfully!",
+        "couponCode": coupon_code,
+        "newPoints": new_points
+    })
+
 @app.route('/api/analyze-food', methods=['POST'])
 def analyze_food():
     """
