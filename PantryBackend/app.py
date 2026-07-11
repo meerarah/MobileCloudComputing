@@ -256,7 +256,7 @@ def get_student_by_email():
 
 @app.route('/api/admin/restock', methods=['POST'])
 def admin_restock():
-    """Restocks a location by refilling all items in the inventory collection for that location."""
+    """Restocks a location by refilling all items in the inventory collection. Creates default items if empty."""
     data = request.json or {}
     location_id = data.get('locationId')
     
@@ -266,15 +266,26 @@ def admin_restock():
     db = get_firestore_client()
     inventory_ref = db.collection('inventory')
     
-    # We'll just restock EVERYTHING to 10 to simulate a full restock for that location.
-    # Note: the app's inventory items don't have a specific location field in this mock, so we'll restock all items if location_id is loc_1.
-    docs = inventory_ref.stream()
+    docs = list(inventory_ref.stream())
     batch = db.batch()
     restocked_count = 0
     
-    for doc in docs:
-        batch.update(doc.reference, {"quantity": 20})
-        restocked_count += 1
+    if not docs:
+        # If the inventory is completely empty, create default items
+        default_items = [
+            {"name": "Fresh Apples", "quantity": 20, "location": location_id, "imageUrl": "https://firebasestorage.googleapis.com/v0/b/mobilecloudcomputingsc.firebasestorage.app/o/items%2Fapple.jpg?alt=media"},
+            {"name": "Canned Tuna", "quantity": 20, "location": location_id, "imageUrl": "https://firebasestorage.googleapis.com/v0/b/mobilecloudcomputingsc.firebasestorage.app/o/items%2Ftuna.jpg?alt=media"},
+            {"name": "Whole Cereal", "quantity": 20, "location": location_id, "imageUrl": "https://firebasestorage.googleapis.com/v0/b/mobilecloudcomputingsc.firebasestorage.app/o/items%2Fcereal.jpg?alt=media"}
+        ]
+        for item in default_items:
+            new_doc = inventory_ref.document()
+            batch.set(new_doc, item)
+            restocked_count += 1
+    else:
+        # Update existing items
+        for doc in docs:
+            batch.update(doc.reference, {"quantity": 20})
+            restocked_count += 1
         
     if restocked_count > 0:
         batch.commit()
