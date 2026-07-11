@@ -272,9 +272,9 @@ def admin_restock():
     if not docs:
         # If the inventory is completely empty, create default items
         default_items = [
-            {"name": "Fresh Apples", "quantity": 20, "location": location_id, "imageUrl": "https://firebasestorage.googleapis.com/v0/b/mobilecloudcomputingsc.firebasestorage.app/o/items%2Fapple.jpg?alt=media"},
-            {"name": "Canned Tuna", "quantity": 20, "location": location_id, "imageUrl": "https://firebasestorage.googleapis.com/v0/b/mobilecloudcomputingsc.firebasestorage.app/o/items%2Ftuna.jpg?alt=media"},
-            {"name": "Whole Cereal", "quantity": 20, "location": location_id, "imageUrl": "https://firebasestorage.googleapis.com/v0/b/mobilecloudcomputingsc.firebasestorage.app/o/items%2Fcereal.jpg?alt=media"}
+            {"name": "Fresh Apples", "quantity": 20, "location": location_id, "imageUrl": "https://images.unsplash.com/photo-1560806887-1e4cd0b6fac6?w=500&q=80"},
+            {"name": "Canned Tuna", "quantity": 20, "location": location_id, "imageUrl": "https://images.unsplash.com/photo-1582283592316-24e03d36b7f3?w=500&q=80"},
+            {"name": "Whole Cereal", "quantity": 20, "location": location_id, "imageUrl": "https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=500&q=80"}
         ]
         for item in default_items:
             new_doc = inventory_ref.document()
