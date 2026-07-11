@@ -272,9 +272,9 @@ def admin_restock():
     if not docs:
         # If the inventory is completely empty, create default items
         default_items = [
-            {"name": "Fresh Apples", "quantity": 20, "location": location_id, "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/15/Red_Apple.jpg"},
-            {"name": "Canned Tuna", "quantity": 20, "location": location_id, "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/30/Can_of_tuna.jpg"},
-            {"name": "Whole Cereal", "quantity": 20, "location": location_id, "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Cornflakes_in_bowl.jpg"}
+            {"name": "Fresh Apples", "quantity": 20, "location": location_id, "imageUrl": "https://raw.githubusercontent.com/meerarah/MobileCloudComputing/main/PantryBackend/static/apple.png"},
+            {"name": "Canned Tuna", "quantity": 20, "location": location_id, "imageUrl": "https://raw.githubusercontent.com/meerarah/MobileCloudComputing/main/PantryBackend/static/tuna.png"},
+            {"name": "Whole Cereal", "quantity": 20, "location": location_id, "imageUrl": "https://raw.githubusercontent.com/meerarah/MobileCloudComputing/main/PantryBackend/static/cereal.png"}
         ]
         for item in default_items:
             new_doc = inventory_ref.document()
