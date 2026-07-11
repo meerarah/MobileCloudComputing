@@ -218,7 +218,6 @@ def register_student():
         "name": name,
         "phone": phone,
         "email": email.lower().strip(),
-        "password": password,
         "eligible": 1,
         "impact_points": 0,
         "claims_this_week": 0
